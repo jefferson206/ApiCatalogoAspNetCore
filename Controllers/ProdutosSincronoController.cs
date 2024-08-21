@@ -20,7 +20,7 @@ namespace ApiCatalogo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> GetProdutosAllSincrono()
         {
-            var produtos = _context.Produtos.ToList();
+            var produtos = _context.Produtos.AsNoTracking().ToList();
             if (produtos is null)
             {
                 return NotFound("Produto não encontrado....");
@@ -31,7 +31,7 @@ namespace ApiCatalogo.Controllers
         [HttpGet("{id:int}", Name = "obterProdutoSincrono")]
         public ActionResult<Produto> GetByIdSincrono(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+            var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
             if (produto is null)
             {
                 return NotFound("Produto não encontrado...");

@@ -17,10 +17,21 @@ namespace ApiCatalogo.Controllers
             _context = context;
         }
 
+        [HttpGet("produtos")]
+        public ActionResult<Categoria> GetAllCategoriasProdutos() 
+        {
+            var categorias = _context.Categorias.Include(c => c.Produtos).AsNoTracking().ToList();
+            if (categorias is null)
+            {
+                return NotFound("Categoria não encontrada....");
+            }
+            return Ok(categorias);
+        }
+
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> GetAllSincrono()
         {
-            var categorias = _context.Categorias.ToList();
+            var categorias = _context.Categorias.AsNoTracking().ToList();
             if (categorias is null)
             {
                 return NotFound("Categoria não encontrada....");
@@ -31,7 +42,7 @@ namespace ApiCatalogo.Controllers
         [HttpGet("{id:int}", Name = "GetByIdSincrono")]
         public ActionResult<Categoria> GetByIdSincrono(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+            var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
             if (categoria == null) 
             { 
                 return NotFound("Categoria não encontrada...");
