@@ -23,7 +23,7 @@ public class Produto : IValidatableObject
     public string? Descricao { get; set; }
     
     [Required]
-    [Column(TypeName="decimal(10,2)")]
+    [Range(1, 10000, ErrorMessage = "O preço deve estar entre {1} e {2}.")]
     public decimal Preco { get; set; }
 
     [Required]

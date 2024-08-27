@@ -1,4 +1,6 @@
 using ApiCatalogo.Context;
+using ApiCatalogo.Extensions;
+using ApiCatalogo.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -18,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ServerVersion.AutoDetect(mySqlConnection))
 );
 
+builder.Services.AddScoped<ApiLogginFilter>();
 
 
 var app = builder.Build();
@@ -27,6 +30,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.ConfigureExceptionHandler();
 } else
 {
     app.UseExceptionHandler("/Error");
