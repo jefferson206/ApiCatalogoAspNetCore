@@ -1,6 +1,6 @@
 ﻿using ApiCatalogo.Context;
 using ApiCatalogo.Models;
-using Microsoft.AspNetCore.Http;
+using ApiCatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,29 +10,29 @@ namespace ApiCatalogo.Controllers
     [ApiController]
     public class CategoriasSincronoController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoriaRepository _repository;
         private string _notFoundMessage = "Categoria não encontrada....";
 
-        public CategoriasSincronoController(AppDbContext context)
+        public CategoriasSincronoController(ICategoriaRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
-        [HttpGet("produtos")]
-        public ActionResult<Categoria> GetAllCategoriasProdutos() 
-        {
-            var categorias = _context.Categorias.Include(c => c.Produtos).AsNoTracking().ToList();
-            if (categorias is null)
-            {
-                return NotFound(_notFoundMessage);
-            }
-            return Ok(categorias);
-        }
+        //[HttpGet("produtos")]
+        //public ActionResult<Categoria> GetAllCategoriasProdutos() 
+        //{
+        //    var categorias = _context.Categorias.Include(c => c.Produtos).AsNoTracking().ToList();
+        //    if (categorias is null)
+        //    {
+        //        return NotFound(_notFoundMessage);
+        //    }
+        //    return Ok(categorias);
+        //}
 
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> GetAllSincrono()
         {
-            var categorias = _context.Categorias.AsNoTracking().ToList();
+            var categorias = _repository.GetCategorias();
             if (categorias is null)
             {
                 return NotFound(_notFoundMessage);
@@ -43,7 +43,7 @@ namespace ApiCatalogo.Controllers
         [HttpGet("{id:int:min(1)}", Name = "GetByIdSincrono")]
         public ActionResult<Categoria> GetByIdSincrono(int id)
         {
-            var categoria = _context.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
+            var categoria = _repository.GetCategoria(id);
             if (categoria == null)
             {
                 return NotFound(_notFoundMessage);
@@ -61,15 +61,14 @@ namespace ApiCatalogo.Controllers
             }
             if (categoria.CategoriaId != null)
             {
-                var catContext = _context.Categorias.FirstOrDefault(c => c.CategoriaId == categoria.CategoriaId);
+                var catContext = _repository.GetCategoria(categoria.CategoriaId);
                 if (catContext != null)
                 {
                     return BadRequest();
                 }
             }
-            _context.Categorias.Add(categoria);
-            _context.SaveChanges();
-            return new CreatedAtRouteResult("GetByIdSincrono", new { id = categoria.CategoriaId }, categoria);
+            var categoriaCriada = _repository.Create(categoria);
+            return new CreatedAtRouteResult("GetByIdSincrono", new { id = categoriaCriada.CategoriaId }, categoriaCriada);
 
         }
 
@@ -80,27 +79,24 @@ namespace ApiCatalogo.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(categoria).State = EntityState.Modified;
-
-            var catContext = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+            var catContext = _repository.GetCategoria(categoria.CategoriaId);
             if (catContext == null)
             {
                 return NotFound(_notFoundMessage);
             }
-            _context.SaveChanges();
-            return Ok(catContext);
+            var categoriaUpdated = _repository.Update(categoria);
+            return Ok(categoriaUpdated);
         }
 
         [HttpDelete("{id:int:min(1)}")]
         public ActionResult<Categoria> DeleteCategoriaSincrona(int id)
         {
-            var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
-            if (categoria == null)
+            var catContext = _repository.GetCategoria(id);
+            if (catContext == null)
             {
                 return NotFound(_notFoundMessage);
             }
-            _context.Categorias.Remove(categoria);
-            _context.SaveChanges();
+            _repository.Delete(id);
             return Ok($"Categoria {id} removido com sucesso...");
         }
     }
