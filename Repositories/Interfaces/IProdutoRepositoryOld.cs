@@ -1,8 +1,8 @@
 ﻿using ApiCatalogo.Models;
 
-namespace ApiCatalogo.Repositories;
+namespace ApiCatalogo.Repositories.Interfaces;
 
-public interface IProdutoRepository
+public interface IProdutoRepositoryOld
 {
     IQueryable<Produto> GetProdutos();
     Produto GetProduto(int id);
