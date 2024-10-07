@@ -18,16 +18,16 @@ namespace ApiCatalogo.Controllers
             _repository = repository;
         }
 
-        //[HttpGet("produtos")]
-        //public ActionResult<Categoria> GetAllCategoriasProdutos() 
-        //{
-        //    var categorias = _context.Categorias.Include(c => c.Produtos).AsNoTracking().ToList();
-        //    if (categorias is null)
-        //    {
-        //        return NotFound(_notFoundMessage);
-        //    }
-        //    return Ok(categorias);
-        //}
+        [HttpGet("produtos")]
+        public ActionResult<Categoria> GetAllCategoriasProdutos()
+        {
+            var categorias = _repository.GetCategoriasQueryable().Include(c => c.Produtos).AsNoTracking().ToList();
+            if (categorias is null)
+            {
+                return NotFound(_notFoundMessage);
+            }
+            return Ok(categorias);
+        }
 
         [HttpGet]
         public ActionResult<IEnumerable<Categoria>> GetAllSincrono()

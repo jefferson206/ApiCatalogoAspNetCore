@@ -1,5 +1,6 @@
 ﻿using ApiCatalogo.Context;
 using ApiCatalogo.Models;
+using ApiCatalogo.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,33 +11,33 @@ namespace ApiCatalogo.Controllers
     [ApiController]
     public class ProdutosSincronoController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProdutoRepository _repository;
 
-        public ProdutosSincronoController(AppDbContext context)
+        public ProdutosSincronoController(IProdutoRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Produto>> GetProdutosAllSincrono()
         {
-            var produtos = _context.Produtos.AsNoTracking().ToList();
+            var produtos = _repository.GetProdutos().AsNoTracking().ToList();
             if (produtos is null)
             {
                 return NotFound("Produto não encontrado....");
             }
-            return produtos;
+            return Ok(produtos);
         }
 
         [HttpGet("{id:int}", Name = "obterProdutoSincrono")]
         public ActionResult<Produto> GetByIdSincrono(int id)
         {
-            var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
+            var produto = _repository.GetProduto(id);
             if (produto is null)
             {
                 return NotFound("Produto não encontrado...");
             }
-            return produto;
+            return Ok(produto);
         }
 
         [HttpPost]
@@ -46,11 +47,8 @@ namespace ApiCatalogo.Controllers
             {
                 return BadRequest();
             }
-            _context.Produtos.Add(produto);
-            _context.SaveChanges();
-
-            return new CreatedAtRouteResult("obterProdutoSincrono", new { id = produto.ProdutoId }, produto);
-
+            var produtoCriado = _repository.Create(produto);
+            return new CreatedAtRouteResult("obterProdutoSincrono", new { id = produtoCriado.ProdutoId }, produtoCriado);
         }
 
         [HttpPut("{id:int}")]
@@ -60,25 +58,28 @@ namespace ApiCatalogo.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(produto).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return Ok(produto);
+            bool isValid = _repository.Update(produto);
+            if (isValid)
+            {
+                return Ok(produto);
+            }
+            return StatusCode(500, $"Falha ao atualizar o produto {id}.");
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult DeleteSincrono(int id)
         {
-            var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-
+            var produto = _repository.GetProduto(id);
             if (produto is null)
             {
                 return NotFound("Produto não encontrado....");
             }
-            _context.Produtos.Remove(produto);
-            _context.SaveChanges();
-
-            return Ok($"Produto {id} removido com sucesso...");
+            bool isValid = _repository.Delete(produto.ProdutoId);
+            if (isValid)
+            {
+                return Ok($"Produto {id} removido com sucesso...");
+            }
+            return StatusCode(500, $"Falha ao excluir o produto {id}.");
         }
     }
 }

@@ -23,6 +23,11 @@ public class CategoriaRepository : ICategoriaRepository
         return _context.Categorias.ToList();
     }
 
+    public IQueryable<Categoria> GetCategoriasQueryable()
+    {
+        return _context.Categorias;
+    }
+
     public Categoria Create(Categoria categoria)
     {
         if (categoria == null) 
