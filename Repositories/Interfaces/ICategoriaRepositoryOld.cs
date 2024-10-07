@@ -1,8 +1,8 @@
 ﻿using ApiCatalogo.Models;
 
-namespace ApiCatalogo.Repositories;
+namespace ApiCatalogo.Repositories.Interfaces;
 
-public interface ICategoriaRepository
+public interface ICategoriaRepositoryOld
 {
     IEnumerable<Categoria> GetCategorias();
     IQueryable<Categoria> GetCategoriasQueryable();

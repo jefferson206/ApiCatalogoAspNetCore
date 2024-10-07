@@ -1,6 +1,6 @@
 ﻿using ApiCatalogo.Context;
 using ApiCatalogo.Models;
-using ApiCatalogo.Repositories;
+using ApiCatalogo.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +10,10 @@ namespace ApiCatalogo.Controllers
     [ApiController]
     public class CategoriasSincronoController : ControllerBase
     {
-        private readonly ICategoriaRepository _repository;
+        private readonly ICategoriaRepositoryOld _repository;
         private string _notFoundMessage = "Categoria não encontrada....";
 
-        public CategoriasSincronoController(ICategoriaRepository repository)
+        public CategoriasSincronoController(ICategoriaRepositoryOld repository)
         {
             _repository = repository;
         }
